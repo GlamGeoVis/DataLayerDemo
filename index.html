@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PieStuff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
+  <link rel="stylesheet" href="bower_components/leaflet-dvf/dist/css/dvf.css" type="text/css" media="screen" />
+</head>
+
+<body>
+
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+  <script type="text/javascript" src="bower_components/leaflet-dvf/dist/leaflet-dvf.js"></script>
+  <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.js"></script>
+  <script type="text/javascript" src="src/jsontile.js"></script>
+
+  <script>
+    var map;
+    var resize = function() {
+      var $map = $('#map');
+      $map.height($(window).height() - $('div.navbar').outerHeight());
+      if (map) {
+        map.invalidateSize();
+      }
+    };
+
+    $(window).on('resize', function() {
+      resize();
+    });
+
+    resize();
+
+    var zoomLevel = 3;
+    map = L.map('map').setView([0, 0], zoomLevel);
+
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var geojsonURL = 'http://localhost:8000/jsonData/{x}/{y}/{z}';
+
+    var pieData = [];
+  	var pieOptions = {
+  		recordsField: '',
+  		locationMode: L.LocationModes.LATLNG,
+  		latitudeField: 'location.1',  // Points to the second item in the location array
+  		longitudeField: 'location.0', // Points to the first item in the location array,
+  		chartOptions: {
+  			'bluePart': {
+  				displayName: 'Blue',
+          color: 'hsl(240,100%,25%)',
+  				fillColor: 'hsl(240,80%,75%)'
+  			},
+  			'redPart': {
+  				displayName: 'Red',
+          color: 'hsl(0,100%,25%)	',
+  				fillColor: 'hsl(0,80%,75%)'
+  			}
+  		},
+  		layerOptions: {
+  			fillOpacity: 0.5,
+  			opacity: 1,
+  			weight: 1,
+  			radius: 50,
+  			barThickness: 30
+  		}
+  	};
+
+    map.on('zoomstart', function() {
+      while(pieData.length > 0) {
+        pieData.pop();
+      }
+    });
+
+    map.on('moveend', function() {
+      pieChartLayer.reloadData();
+    });
+
+    map.on('zoomend', function() {
+      pieChartLayer.reloadData();
+    });
+
+    var dataGridLayer = new L.VectorGrid.JsonTile(geojsonURL, {}, pieData);
+    dataGridLayer.addTo(map);
+    var pieChartLayer = new L.PieChartDataLayer(pieData, pieOptions);
+    map.addLayer(pieChartLayer);
+    setTimeout(function(){
+      pieChartLayer.reloadData();
+    }, 2000);
+  </script>
+</body>
+</html>
