@@ -80,27 +80,11 @@
   		}
   	};
 
-    map.on('zoomstart', function() {
-      while(pieData.length > 0) {
-        pieData.pop();
-      }
-    });
-
-    map.on('moveend', function() {
-      pieChartLayer.reloadData();
-    });
-
-    map.on('zoomend', function() {
-      pieChartLayer.reloadData();
-    });
-
-    var dataGridLayer = new L.VectorGrid.JsonTile(geojsonURL, {}, pieData);
-    dataGridLayer.addTo(map);
     var pieChartLayer = new L.PieChartDataLayer(pieData, pieOptions);
     map.addLayer(pieChartLayer);
-    setTimeout(function(){
-      pieChartLayer.reloadData();
-    }, 2000);
+
+    var dataGridLayer = new L.VectorGrid.JsonTile(geojsonURL, {}, pieChartLayer);
+    dataGridLayer.addTo(map);
   </script>
 </body>
 </html>

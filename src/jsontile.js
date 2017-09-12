@@ -1,8 +1,13 @@
 L.VectorGrid.JsonTile = L.VectorGrid.extend({
-  initialize: function(url, options, datasource) {
+  // dataLayer should be a leaflet-dvf DataLayer
+  initialize: function(url, options, dataLayer) {
     this._url = url;
-    this._datasource = datasource;
+    this._dataLayer = dataLayer;
+    this._zoom = -1;
     L.VectorGrid.prototype.initialize.call(this, options);
+    this.on('load', function() {
+      this._dataLayer.reloadData();
+    });
   },
   _urlAsJson: function(tileUrl) {
     return fetch(tileUrl).then(
@@ -24,10 +29,16 @@ L.VectorGrid.JsonTile = L.VectorGrid.extend({
       data['-y'] = invertedY;
     }
 
-    var tileUrl = L.Util.template(this._url, L.extend(data, this.options));
+    if(this._zoom!=coords.z) {
+      this._zoom = coords.z;
+      while(this._dataLayer._data.length > 0) {
+        this._dataLayer._data.pop();
+      }
+    }
 
+    var tileUrl = L.Util.template(this._url, L.extend(data, this.options));
     // console.log('Fetch url: ' + tileUrl);
-    return Promise.all([this._datasource, this._urlAsJson(tileUrl)])
+    return Promise.all([this._dataLayer._data, this._urlAsJson(tileUrl)])
       .then(function(args) {
         var dataSource = args[0];
         var data = args[1];
