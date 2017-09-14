@@ -3,6 +3,7 @@ from __future__ import division
 from flask import Flask, send_from_directory, jsonify
 from random import randint
 import math
+import pandas as pd
 
 app = Flask(__name__, static_url_path='/')
 
@@ -27,16 +28,19 @@ def buildData(x,y,z):
     #  latitudes 50 and 54 N, and longitudes 3 and 8 E.
     if 48 <= lat <= 56 and 3 <= lon <= 8:
         data = dutchData(lat,lon,z)
+    elif 38 <= lat <= 48 and 3 <= lon <= 8:
+        data = queryData(x, y, z)
     else:
-        data = randomData(lat,lon)
+        # data = randomData(lat,lon)
+        data = []
     return jsonify(data)
 
 def randomData(lat,lon):
     bluePart = randint(10,90)
     return [{
         "location": [ lon, lat ],
-        "bluePart": bluePart,
-        "redPart": 100 - bluePart,
+        "A": bluePart,
+        "B": 100 - bluePart,
     }]
 
 def dutchData(lat,lon,z):
@@ -44,24 +48,39 @@ def dutchData(lat,lon,z):
         # Return aggregated data
         return [{
             "location": [ 5.0, 52.0 ],
-            "bluePart": 25,
-            "redPart": 75,
+            "A": 25,
+            "B": 75,
         }]
     else:
         # Return expanded data
         return [{
             "location": [ 4.8, 52.3 ],
-            "bluePart": 90,
-            "redPart": 10,
+            "A": 90,
+            "B": 10,
         }, {
             "location": [ 5.8, 51.8 ],
-            "bluePart": 10,
-            "redPart": 90,
+            "A": 10,
+            "B": 90,
         }]
+
+def buildPieData(latlon, group):
+    d = group.groupby('cat').size().to_dict()
+    nItems = sum(d.values())
+    data = { k:100 * v/nItems for k,v in d.iteritems() }
+    data["location"] = [ latlon[1], latlon[0] ]
+    return data
+
+def queryData(x,y,z):
+    lat0,lon0 = num2deg(x, y, z)
+    lat1,lon1 = num2deg(x + 1, y + 1, z)
+    # Here instead of loading data from file, we will load data clustered
+    # for the lat/lon we are intereste on
+    data = pd.read_csv('data.csv', sep=' ', names=['lat', 'lon', 'w', 'cat'])
+    byLL = data.groupby(['lat', 'lon'])
+    return [ buildPieData(latlon,g) for latlon,g in byLL ]
 
 @app.route('/<path:path>')
 def send_files(path):
-
     return send_from_directory('', path)
 
 app.run(host='0.0.0.0', port=8000, debug=True)

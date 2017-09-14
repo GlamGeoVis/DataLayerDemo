@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>PieStuff</title>
@@ -54,31 +55,41 @@
     var geojsonURL = 'http://localhost:8000/jsonData/{x}/{y}/{z}';
 
     var pieData = [];
-  	var pieOptions = {
-  		recordsField: '',
-  		locationMode: L.LocationModes.LATLNG,
-  		latitudeField: 'location.1',  // Points to the second item in the location array
-  		longitudeField: 'location.0', // Points to the first item in the location array,
-  		chartOptions: {
-  			'bluePart': {
-  				displayName: 'Blue',
+    var pieOptions = {
+      recordsField: '',
+      locationMode: L.LocationModes.LATLNG,
+      latitudeField: 'location.1', // Points to the second item in the location array
+      longitudeField: 'location.0', // Points to the first item in the location array,
+      chartOptions: {
+        'A': {
+          displayName: 'Blue',
           color: 'hsl(240,100%,25%)',
-  				fillColor: 'hsl(240,80%,75%)'
-  			},
-  			'redPart': {
-  				displayName: 'Red',
-          color: 'hsl(0,100%,25%)	',
-  				fillColor: 'hsl(0,80%,75%)'
-  			}
-  		},
-  		layerOptions: {
-  			fillOpacity: 0.5,
-  			opacity: 1,
-  			weight: 1,
-  			radius: 50,
-  			barThickness: 30
-  		}
-  	};
+          fillColor: 'hsl(240,80%,75%)'
+        },
+        'B': {
+          displayName: 'Red',
+          color: 'hsl(0,100%,25%)',
+          fillColor: 'hsl(0,80%,75%)'
+        },
+        'C': {
+          displayName: 'Green',
+          color: 'hsl(120,17%,45%)',
+          fillColor: 'hsl(120,100%,25%)'
+        },
+        'D': {
+          displayName: 'Yellow',
+          color: 'hsl(60,100%,25%)',
+          fillColor: 'hsl(8,100%,42%)'
+        }
+      },
+      layerOptions: {
+        fillOpacity: 0.5,
+        opacity: 1,
+        weight: 1,
+        radius: 50,
+        barThickness: 30
+      }
+    };
 
     var pieChartLayer = new L.PieChartDataLayer(pieData, pieOptions);
     map.addLayer(pieChartLayer);
@@ -87,4 +98,5 @@
     dataGridLayer.addTo(map);
   </script>
 </body>
+
 </html>
