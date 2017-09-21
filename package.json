@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "leaflet-dvf": "^0.3.1"
+  },
+  "name": "DataLayerDemo",
+  "version": "1.0.0",
+  "description": "Demo dummy data",
+  "main": "index.js",
+  "repository": "https://github.com/GlamGeoVis/DataLayerDemo/",
+  "author": "Carlos_Martine",
+  "license": "Apache2",
+  "private": false
+}
